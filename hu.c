@@ -2,9 +2,15 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-//#include "util/chk_time.h"
+#include <sys/time.h>
 
-//#define _MACH
+int64_t systemms() {
+	struct timeval tm;
+    if(0 != gettimeofday(&tm,NULL)){
+    	return 0;
+    }
+    return tm.tv_sec * 1000 + tm.tv_usec/1000;
+}
 
 #define MAX_PAIMIAN 43//9个条+9个万+9个筒+东南西北中发白春夏秋冬梅竹兰菊
 #define PAIMIAN 0
@@ -56,12 +62,12 @@ int RemoveSun(struct mahjongs *mj) {
 typedef int (*rFunc)(struct mahjongs *);
 
 int CheckScheme(char s,struct mahjongs *mj) {
-	static struct mahjongs g_pais[MAX_PAIMIAN];
+	static struct mahjongs mahjongs_pool[MAX_PAIMIAN];
 	rFunc f[2] = {RemoveKe,RemoveSun};
 	int j = 0;
 	for(int i = 0; i < mj->count; ++i) {
 		if(mj->mahjong[i][COUNT] >= 2) {
-			struct mahjongs *pp = &g_pais[j++];
+			struct mahjongs *pp = &mahjongs_pool[j++];
 			memset(pp,0,sizeof(*pp));			
 			for(int i = 0; i < mj->count; ++i) {
 				Add(pp,mj->mahjong[i][PAIMIAN],mj->mahjong[i][COUNT]);
@@ -70,8 +76,7 @@ int CheckScheme(char s,struct mahjongs *mj) {
 			jiang[COUNT] -= 2;
 			int ok = 1;
 			for(int i = 0; i < 4; ++i) {
-				int b = ((1 << i) & s) == 0 ? 0:1;
-				if(!f[b](pp)) {
+				if(!f[((1 << i) & s) == 0 ? 0:1](pp)) {
 					ok = 0;
 					break;
 				}
@@ -113,7 +118,9 @@ int main() {
 	char p6[14] = {1,1,1,4,5,6,2,3,4,4,5,6,9,9};
 	char p7[14] = {1,2,3,4,1,2,3,4,5,5,7,7,9,9};
 
-/*	uint64_t now = chk_systick();
+	int64_t now = systemms();
+
+	int count = 0;
 
 	for(int i = 0; i < 10000; ++i) {
 		CheckHu(p1);
@@ -122,11 +129,14 @@ int main() {
 		CheckHu(p4);		
 		CheckHu(p5);
 		CheckHu(p6);
-		CheckHu(p7);		
+		CheckHu(p7);
+		count += 7;		
 	}
 
-	printf("time %dms\n",chk_systick() - now);
-*/
+	int elapse = (int)(systemms() - now);
+
+	printf("count:%d time %dms %d per second\n",count,elapse,count*1000/elapse);
+
 
 	printf("%d\n",CheckHu(p1));
 	printf("%d\n",CheckHu(p2));
