@@ -72,6 +72,16 @@ function pai:RemoveOrder()
 	return false
 end
 
+function pai:GetPairCount()
+	local count = 0
+	for k,v in pairs(self.pai) do
+		if v[2] >= 2 then
+			count = count + 1
+		end
+	end
+	return count
+end
+
 function M.CheckScheme(s,p)
 	local f ={[0] = p.RemoveKe,[1] = p.RemoveOrder}
 	for k,v in pairs(p.pai) do
@@ -96,7 +106,18 @@ function M.CheckScheme(s,p)
 end
 
 function M.CheckHu(pai)
+
+	if #pai < 14 then
+		return false
+	end
+
 	local p = newPai(pai)
+
+	--7个对子
+	if 7 == p:GetPairCount() then
+		return true
+	end
+
 	for k,v in pairs(scheme) do
 		if M.CheckScheme(v,p) then
 			return true
@@ -105,9 +126,10 @@ function M.CheckHu(pai)
 	return false
 end
 
+
 local now = os.time()
 
-for i = 1,1000 do
+for i = 1,10000 do
 
 	M.CheckHu({1,1,1,2,2,2,3,3,3,4,4,4,5,5})
 	M.CheckHu({1,2,3,4,5,6,1,2,3,4,5,6,7,7})
@@ -115,7 +137,7 @@ for i = 1,1000 do
 	M.CheckHu({1,1,1,2,3,4,5,6,4,5,6,7,8,9})
 	M.CheckHu({1,1,1,2,3,2,3,4,3,4,5,7,8,9})
 	M.CheckHu({1,1,1,4,5,6,2,3,4,4,5,6,9,9})
-
+	M.CheckHu({1,2,3,6,1,2,3,4,5,5,7,7,9,9})
 end
 
 print(os.time() - now)
@@ -129,6 +151,9 @@ print(M.CheckHu({1,1,1,2,3,4,5,6,4,5,6,7,8,9}))
 print(M.CheckHu({1,1,1,2,3,2,3,4,3,4,5,7,8,9}))
 print(M.CheckHu({1,1,1,4,5,6,2,3,4,4,5,6,9,9}))
 print(M.CheckHu({1,2,3,4,1,2,3,4,5,5,7,7,9,9}))
+print(M.CheckHu({1,1,2,2,3,3,4,4,5,5,7,7,9,9}))
+
+print(M.CheckHu({1,2,3,6,1,2,3,4,5,5,7,7,9,9}))
 
 print(M.CheckHu({11,11,11,12,13,14,15,16,17,18,19,19,19,11}))
 print(M.CheckHu({11,11,11,12,13,14,15,16,17,18,19,19,19,12}))
